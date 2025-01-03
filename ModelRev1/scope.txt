@@ -1,0 +1,17 @@
+native english speakers learning nepali adjacent, try hindi because more relevant data
+
+needs ML pipeline to analyze hindi 
+
+whisper for language identification, break down audio into phonetic components
+
+quantitatively define clarity:
+    ~ buzzword research: speech signals feature extraction. Mel-scale frequency cepstral coefficients (MFCC). https://arxiv.org/pdf/2306.08798 
+        they applied cnn and rnn and 'dnn' (lol)
+            densenet - dense blocks, transition layers. feed forward connection. k(k+1)/2 connections for k layers. 
+            multi dense net - multi task learning, train nn simultaneoiulsy learn multiple related task, backprop all graidents from all tasks together
+            psa dense net - pyramid split attention module, EPSA net derived
+                spcmodule channel seg, extract spatial info to generate multi scale features. divide MFCC feature map into s parts based on number of input channels (C),
+                 reatins same shape as original feautre map, S feature maps, each contains C/S channels. spatial info -> convolution on feature maps of different scales. 
+                 concatenate all multi scale feature maps, new multi scale fusion feature map is obtained. 
+                SEWeight module - extract attention weights. squeeze and excitation. global average pooling applied to calculate mean of each channel, compressing feature maps into numerical info 
+                 with shape 1 x1 x C. processed through two lienar layers with ReLU activation and sigmoid activation function to obtain weight for each channel. 
