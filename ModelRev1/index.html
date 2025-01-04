@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Recorder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+        button:disabled {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Record Your Audio</h1>
+    <button id="startRecordButton" onclick="startRecording()">Start Recording</button>
+    <button id="stopRecordButton" onclick="stopRecording()" disabled>Stop Recording</button>
+    <a id="downloadLink" style="display:none" download="recorded_audio.wav">
+        <button>Download Audio</button>
+    </a>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        // Function to start recording
+        async function startRecording() {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            
+            mediaRecorder.ondataavailable = function(event) {
+                audioChunks.push(event.data);
+            };
+            
+            mediaRecorder.onstop = function() {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const downloadLink = document.getElementById('downloadLink');
+                const downloadButton = downloadLink.querySelector('button');
+                
+                downloadLink.href = audioUrl;
+                downloadLink.style.display = 'block';
+                downloadButton.textContent = 'Download Recorded Audio';
+
+                // Clear audio chunks for future recordings
+                audioChunks = [];
+            };
+
+            mediaRecorder.start();
+            document.getElementById('startRecordButton').disabled = true;
+            document.getElementById('stopRecordButton').disabled = false;
+        }
+
+        // Function to stop recording
+        function stopRecording() {
+            mediaRecorder.stop();
+            document.getElementById('startRecordButton').disabled = false;
+            document.getElementById('stopRecordButton').disabled = true;
+        }
+    </script>
+</body>
+</html>

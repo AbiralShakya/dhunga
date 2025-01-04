@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Recorder</title>
+</head>
+<body>
+  <h1>Record and Upload Audio</h1>
+  <button id="start">Start Recording</button>
+  <button id="stop" disabled>Stop Recording</button>
+  <audio id="audioPlayback" controls></audio>
+  <button id="upload" disabled>Upload Recording</button>
+
+  <script>
+    let mediaRecorder;
+    let audioChunks = [];
+
+    document.getElementById("start").addEventListener("click", async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: "audio/wav" });
+        audioChunks = [];
+        const audioURL = URL.createObjectURL(blob);
+        audioPlayback.src = audioURL;
+        //audioPlayback.play();
+        const audioPlayback = document.getElementById("audioPlayback").src = audioURL;
+
+        document.getElementById("upload").disabled = false;
+
+        document.getElementById("upload").addEventListener("click", () => {
+          const formData = new FormData();
+          formData.append("audio", blob, "recording.wav");
+
+          fetch("/upload", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => alert(data.message))
+            .catch((error) => console.error(error));
+        });
+      };
+
+      mediaRecorder.start();
+      document.getElementById("start").disabled = true;
+      document.getElementById("stop").disabled = false;
+    });
+
+    document.getElementById("stop").addEventListener("click", () => {
+      mediaRecorder.stop();
+      document.getElementById("start").disabled = false;
+      document.getElementById("stop").disabled = true;
+    });
+  </script>
+</body>
+</html>
